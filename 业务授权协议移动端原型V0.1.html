@@ -1,0 +1,3985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>协议签署系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(180deg, #f8fafb 0%, #e8eef3 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 30px rgba(52, 73, 94, 0.15);
+        }
+
+        .page {
+            display: none;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #signPage {
+            padding-bottom: 100px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            margin: -20px -20px 30px -20px;
+            border-radius: 0;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #d4a574 0%, #c8956d 100%);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-2px);
+        }
+
+        .user-info {
+            background: #f7f9fc;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid #1e40af;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-name::before {
+            content: '👤';
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .task-name {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .identity-status {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .status-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .status-text {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.35);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1e40af;
+            border: 2px solid #1e40af;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #1e3a8a;
+            color: #1e3a8a;
+        }
+
+        .todo-list {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .todo-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .todo-item:hover {
+            background: #f8fafc;
+            border-left: 4px solid #1e40af;
+        }
+
+        .todo-item.highlight {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #d97706;
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1e3a8a;
+            letter-spacing: 0.3px;
+        }
+
+        .todo-desc {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .todo-badge {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #dc2626;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .face-recognition {
+            text-align: center;
+        }
+
+        .face-camera {
+            width: 280px;
+            height: 320px;
+            background: #f8fafc;
+            border: 3px dashed #1e40af;
+            border-radius: 12px;
+            margin: 30px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #1e40af;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 8px rgba(30, 64, 175, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .face-camera.detecting {
+            border-color: #3b82f6;
+            border-style: solid;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+            background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+        }
+
+        .face-camera.scanning {
+            border-color: #059669;
+            border-style: solid;
+            animation: pulse 2s infinite;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            box-shadow: 0 0 25px rgba(5, 150, 105, 0.3);
+        }
+
+        .face-camera.success {
+            border-color: #10b981;
+            border-style: solid;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+
+
+        @keyframes pulse {
+            0% { 
+                transform: scale(1); 
+                box-shadow: 0 0 25px rgba(5, 150, 105, 0.3);
+            }
+            50% { 
+                transform: scale(1.02); 
+                box-shadow: 0 0 35px rgba(5, 150, 105, 0.5);
+            }
+            100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 25px rgba(5, 150, 105, 0.3);
+            }
+        }
+
+        .scanning-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #059669, transparent);
+            top: -4px;
+            animation: scan 2s linear infinite;
+            border-radius: 2px;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .face-outline {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 220px;
+            border: 2px dashed #94a3b8;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .face-outline.active {
+            border-color: #3b82f6;
+            border-style: solid;
+            opacity: 1;
+            animation: face-outline-pulse 2s infinite;
+        }
+
+        .face-outline.success {
+            border-color: #10b981;
+            border-style: solid;
+            opacity: 1;
+        }
+
+
+
+        @keyframes face-outline-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .face-detection-status {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .face-detection-status.show {
+            opacity: 1;
+        }
+
+        .recognition-progress {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .progress-step {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .progress-step.active {
+            background: #3b82f6;
+            animation: step-pulse 1s infinite;
+        }
+
+        .progress-step.completed {
+            background: #10b981;
+        }
+
+        @keyframes step-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        .verification-status {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .status-text {
+            font-size: 16px;
+            color: #1e40af;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(30, 64, 175, 0.2);
+        }
+
+        #retryBtn {
+            animation: retryPulse 2s infinite;
+        }
+
+        @keyframes retryPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+            }
+        }
+
+        .recognition-tips {
+            color: #1e40af;
+            margin-bottom: 32px;
+            line-height: 1.6;
+            font-size: 15px;
+            text-align: center;
+            background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #1e40af;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.1);
+        }
+
+        .agreement-content {
+            background: #fafbfc;
+            padding: 24px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 24px;
+            line-height: 1.7;
+            border: 1px solid #e2e8f0;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .agreement-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+            color: #1e3a8a;
+            letter-spacing: 0.5px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #d4a574;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-radius: 8px;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.3);
+        }
+
+        .success-message {
+            text-align: center;
+            font-size: 18px;
+            color: #1e3a8a;
+            margin-bottom: 32px;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+
+        .reject-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            border-radius: 8px;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+            animation: shake 0.8s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .history-item {
+            background: #fff;
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #059669;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .history-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1e3a8a;
+            letter-spacing: 0.3px;
+        }
+
+        .history-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .status-completed {
+            color: #059669;
+            font-weight: 700;
+            background: #f0fdf4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .status-rejected {
+            color: #dc2626;
+            font-weight: 700;
+            background: #fef2f2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .status-confirmed {
+            color: #059669;
+            font-weight: 700;
+            background: #ecfdf5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-hint {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+
+
+
+
+        /* 协议列表样式 */
+        .agreement-list {
+            margin-bottom: 80px;
+        }
+
+        .agreement-section-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .agreement-section-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .agreement-card {
+            background: #fff;
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .agreement-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .agreement-card.selected {
+            border-color: #1e40af;
+            background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+            box-shadow: 0 4px 20px rgba(30, 64, 175, 0.15);
+        }
+
+        .agreement-checkbox {
+            margin-right: 16px;
+            position: relative;
+        }
+
+        .agreement-checkbox-input {
+            display: none;
+        }
+
+        .agreement-checkbox-label {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .agreement-checkbox-label::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            width: 6px;
+            height: 10px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .agreement-checkbox-input:checked + .agreement-checkbox-label {
+            background: #1e40af;
+            border-color: #1e40af;
+        }
+
+        .agreement-checkbox-input:checked + .agreement-checkbox-label::after {
+            opacity: 1;
+        }
+
+        .agreement-checkbox-input:disabled + .agreement-checkbox-label {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .agreement-checkbox-input:disabled:checked + .agreement-checkbox-label {
+            background: #059669;
+            border-color: #059669;
+            opacity: 0.8;
+        }
+
+        .agreement-info {
+            flex: 1;
+        }
+
+        .agreement-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .agreement-desc {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        .read-agreement-section {
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .btn-read-all {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
+            width: 100%;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-read-all:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.35);
+        }
+
+        .btn-read-all:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+
+
+
+
+
+
+        /* 底部操作按钮 */
+        .bottom-actions {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-reject {
+            flex: 1;
+            background: #fff;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+            font-weight: 700;
+        }
+
+        .btn-reject:hover {
+            background: #fef2f2;
+            border-color: #b91c1c;
+            color: #b91c1c;
+        }
+
+        .btn-agree {
+            flex: 1;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            border: none;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        }
+
+        .btn-agree:hover {
+            background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+        }
+
+        .btn-agree:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 协议内容弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            padding: 0;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { 
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to { 
+                opacity: 1;
+                backdrop-filter: blur(8px);
+            }
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 414px;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
+            transform: translateY(100%);
+            animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px 24px;
+            border-bottom: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3a8a;
+            text-align: center;
+            flex: 1;
+            margin-right: 32px;
+            display: none;
+        }
+
+        /* Tab导航样式 */
+        .modal-tabs {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 80px;
+            z-index: 9;
+            padding: 16px 0;
+        }
+
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 0 24px;
+            gap: 12px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tab-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-button {
+            background: #f1f5f9;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .tab-button.active {
+            background: #1e40af;
+            color: white;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
+        }
+
+        .tab-button.read {
+            background: #059669;
+            color: white;
+        }
+
+        .tab-button.read.active {
+            background: #047857;
+        }
+
+        .tab-button .read-indicator {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tab-button.read .read-indicator {
+            opacity: 1;
+        }
+
+        .modal-close {
+            background: #f1f5f9;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #64748b;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .modal-close:hover {
+            background: #e2e8f0;
+            transform: scale(1.1);
+        }
+
+        .modal-close:active {
+            transform: scale(0.95);
+        }
+
+        .modal-body {
+            padding: 24px 24px 24px 24px;
+            max-height: 50vh;
+            overflow-y: auto;
+            line-height: 1.8;
+            color: #374151;
+            font-size: 16px;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: auto;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 2px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .modal-body h3 {
+            color: #1e3a8a;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #d4a574;
+        }
+
+        .modal-body p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        .modal-body strong {
+            color: #1e3a8a;
+            font-weight: 700;
+        }
+
+        .modal-footer {
+            padding: 16px 24px 32px 24px;
+            border-top: none;
+            background: #fff;
+            text-align: center;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+
+
+
+        .btn-confirm-read {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.25);
+            width: 100%;
+            min-height: 48px;
+        }
+
+        .btn-confirm-read:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
+        }
+
+        .btn-confirm-read:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.25);
+        }
+
+        .btn-confirm-read:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 确认弹窗 */
+        .confirm-modal {
+            text-align: center;
+        }
+
+        .confirm-modal .modal-content {
+            max-height: 60vh;
+        }
+
+        .confirm-modal .modal-body {
+            padding: 32px 24px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .confirm-modal .modal-footer {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            padding: 16px 24px 32px 24px;
+        }
+
+        .confirm-modal .btn {
+            flex: 1;
+            margin: 0;
+            min-height: 48px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-modal .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 验证码输入 */
+        .verification-input {
+            text-align: center;
+            margin: 24px 0;
+        }
+
+        .code-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+
+        .code-digit {
+            width: 48px;
+            height: 56px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .code-digit:focus {
+            outline: none;
+            border-color: #1e40af;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+            transform: scale(1.05);
+        }
+
+        .code-digit.filled {
+            border-color: #059669;
+            background: #f0fdf4;
+            color: #059669;
+        }
+
+        .code-digit.error {
+            border-color: #dc2626;
+            background: #fef2f2;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+
+
+        /* 响应式优化 */
+        @media (max-width: 360px) {
+            .code-input-container {
+                gap: 8px;
+                padding: 0 10px;
+            }
+            
+            .code-digit {
+                width: 42px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .code-input-container {
+                gap: 6px;
+                padding: 0 5px;
+            }
+            
+            .code-digit {
+                width: 38px;
+                height: 46px;
+                font-size: 18px;
+            }
+        }
+
+        .send-code-btn {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 16px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-code-btn:hover {
+            background: #dbeafe;
+            border-color: #93c5fd;
+        }
+
+        .send-code-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-code-btn:disabled {
+            color: #94a3b8;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+
+        /* 自定义提示弹窗 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            min-width: 280px;
+            max-width: 350px;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .toast-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .toast-backdrop.show {
+            opacity: 1;
+        }
+
+        .toast-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .toast-icon.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .toast-icon.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .toast-icon.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .toast-icon.info {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+        }
+
+        .toast-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .toast-message {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .toast-button {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .toast-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(30, 64, 175, 0.3);
+        }
+
+        .toast-button:active {
+            transform: translateY(0);
+        }
+
+        /* 身份识别认证样式 */
+        .identity-verification {
+            text-align: center;
+            padding-bottom: 100px;
+        }
+
+        .security-tips {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #bae6fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .tips-icon {
+            font-size: 24px;
+        }
+
+        .tips-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3a8a;
+            line-height: 1.5;
+        }
+
+        .id-card-upload {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .upload-section {
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 16px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-icon {
+            font-size: 20px;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 2px;
+        }
+
+        .title-icon svg {
+            transition: all 0.3s ease;
+        }
+
+        .upload-title:hover .title-icon svg {
+            transform: scale(1.1);
+        }
+
+        .upload-area {
+            background: #ffffff;
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            height: 240px;
+            min-height: 240px;
+        }
+
+        .upload-area:hover {
+            border-color: #1e40af;
+            box-shadow: 0 4px 16px rgba(30, 64, 175, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.uploaded {
+            border-color: #059669;
+            border-style: solid;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.1);
+        }
+
+        .upload-area.uploading {
+            border-color: #f59e0b;
+            border-style: solid;
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.1);
+            animation: uploadPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes uploadPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .upload-preview {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            min-height: 240px;
+        }
+
+        .id-card-example {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            opacity: 0.3;
+            filter: grayscale(50%);
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover .id-card-example {
+            opacity: 0.2;
+            filter: grayscale(30%);
+        }
+
+        .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(248, 250, 252, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .upload-area:hover .upload-overlay {
+            background: rgba(240, 249, 255, 0.95);
+        }
+
+        .upload-icon {
+            color: #1e40af;
+            margin-bottom: 12px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            color: #1d4ed8;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: #1e3a8a;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 400;
+            line-height: 1.3;
+        }
+
+        .uploaded-preview {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            min-height: 240px;
+            background: #ffffff;
+            border: 2px solid #059669;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.1);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .uploaded-preview:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .uploaded-image {
+            width: 100%;
+            height: 236px;
+            min-height: 236px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .upload-delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: rgba(220, 38, 38, 0.9);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            z-index: 10;
+        }
+
+        .upload-delete-btn:hover {
+            background: rgba(220, 38, 38, 1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+
+        .upload-success-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(5, 150, 105, 0.95);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(4px);
+        }
+
+        .upload-area.uploaded .upload-overlay {
+            background: rgba(240, 253, 244, 0.95);
+        }
+
+        /* 图片选择模态框样式 */
+        .photo-selector-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .photo-selector-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .photo-selector-content {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px 16px 0 0;
+            padding: 0;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+            touch-action: none;
+        }
+
+        .photo-selector-handle {
+            width: 36px;
+            height: 4px;
+            background: #d1d5db;
+            border-radius: 2px;
+            margin: 12px auto 8px;
+            cursor: pointer;
+        }
+
+        .photo-selector-modal.active .photo-selector-content {
+            transform: translateY(0);
+        }
+
+        .photo-selector-header {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+            position: relative;
+        }
+
+        .photo-selector-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .photo-selector-close {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6b7280;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .photo-selector-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .photo-selector-options {
+            padding: 8px 0;
+        }
+
+        .photo-option {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: none;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .photo-option:hover {
+            background: #f9fafb;
+        }
+
+        .photo-option:active {
+            background: #f3f4f6;
+        }
+
+        .photo-option-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 16px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-option-text {
+            flex: 1;
+        }
+
+        .photo-option-arrow {
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .photo-selector-cancel {
+            margin: 8px 0 20px;
+        }
+
+        .photo-cancel-btn {
+            display: block;
+            width: calc(100% - 40px);
+            margin: 0 20px;
+            padding: 14px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .photo-cancel-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .photo-cancel-btn:active {
+            transform: scale(0.98);
+        }
+
+        .upload-area.uploaded .id-card-example {
+            opacity: 0.1;
+        }
+
+        .verification-actions {
+            margin-top: 24px;
+            padding: 16px 0;
+        }
+
+        .verification-actions .btn {
+            margin: 0;
+        }
+
+        #startFaceBtn:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 上传动画效果 */
+        .uploading .upload-icon svg {
+            animation: rotate 2s linear infinite;
+        }
+
+        .upload-spinner svg {
+            animation: spin 1s linear infinite !important;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 安全提示区域优化 */
+        .security-tips {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #0ea5e9;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+        }
+
+        .security-tips .tips-icon {
+            background: #0ea5e9;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .security-tips .tips-icon svg {
+            color: white;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 待办事项页面 -->
+        <div id="todoPage" class="page active">
+            <div class="header">
+                <h1>待办事项</h1>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-name">您好，张三先生</div>
+                <div class="task-name">您有 3 项待办事项需要处理</div>
+            </div>
+            
+            <div class="todo-list">
+                <div class="todo-item" onclick="showPage('signPage')">
+                    <div class="todo-title">账户安全升级</div>
+                    <div class="todo-desc">请及时完成账户安全升级</div>
+                </div>
+                
+                <div class="todo-item highlight" onclick="showPage('signPage')">
+                    <div class="todo-title">协议签署</div>
+                    <div class="todo-desc">重要协议需要您的签署确认</div>
+                </div>
+                
+                <div class="todo-item" onclick="showPage('signPage')">
+                    <div class="todo-title">信息变更确认</div>
+                    <div class="todo-desc">个人信息变更需要确认</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 签署页面 -->
+        <div id="signPage" class="page">
+            <div class="header">
+                <button class="back-btn" onclick="showPage('todoPage')">←</button>
+                <h1>协议签署</h1>
+            </div>
+            
+            <div class="user-info fade-in">
+                <div class="user-name">张三</div>
+                <div class="task-name">待办事项：普惠易贷协议签署</div>
+            </div>
+            
+            <div class="agreement-list">
+                <div class="agreement-section-header">
+                    <h3>请选择需要处理的协议：</h3>
+                    <p class="section-subtitle">您可以选择一个或多个协议进行签署或拒绝</p>
+                </div>
+                
+                <div class="agreement-card" data-agreement="personal">
+                    <div class="agreement-checkbox">
+                        <input type="checkbox" id="checkbox-personal" class="agreement-checkbox-input" onchange="updateAgreementSelection('personal')">
+                        <label for="checkbox-personal" class="agreement-checkbox-label"></label>
+                    </div>
+                    <div class="agreement-info">
+                        <div class="agreement-name">个人信息使用授权书</div>
+                        <div class="agreement-desc">用于处理您的个人信息</div>
+                    </div>
+                </div>
+                
+                <div class="agreement-card" data-agreement="credit">
+                    <div class="agreement-checkbox">
+                        <input type="checkbox" id="checkbox-credit" class="agreement-checkbox-input" onchange="updateAgreementSelection('credit')">
+                        <label for="checkbox-credit" class="agreement-checkbox-label"></label>
+                    </div>
+                    <div class="agreement-info">
+                        <div class="agreement-name">个人征信业务信息处理授权书</div>
+                        <div class="agreement-desc">用于查询和处理您的征信信息</div>
+                    </div>
+                </div>
+                
+                <div class="agreement-card" data-agreement="business">
+                    <div class="agreement-checkbox">
+                        <input type="checkbox" id="checkbox-business" class="agreement-checkbox-input" onchange="updateAgreementSelection('business')">
+                        <label for="checkbox-business" class="agreement-checkbox-label"></label>
+                    </div>
+                    <div class="agreement-info">
+                        <div class="agreement-name">业务授权决议</div>
+                        <div class="agreement-desc">用于办理相关银行业务</div>
+                    </div>
+                </div>
+                
+                <!-- 阅读协议按钮 -->
+                <div class="read-agreement-section">
+                    <button class="btn-read-all" id="readAllBtn" onclick="readSelectedAgreements()" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; vertical-align: middle;">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                        阅读选中的协议
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bottom-actions">
+                <button class="btn btn-reject" id="rejectSelectedBtn" onclick="rejectSelectedAgreements()">
+                    拒绝
+                </button>
+                <button class="btn btn-agree" id="agreeSelectedBtn" onclick="agreeSelectedAgreements()" disabled>
+                    同意
+                </button>
+            </div>
+        </div>
+
+        <!-- 身份识别认证页面 -->
+        <div id="faceRecognitionPage" class="page">
+            <div class="header">
+                <button class="back-btn" onclick="showPage('signPage')">←</button>
+                <h1>身份识别认证</h1>
+            </div>
+            
+            <div class="identity-verification">
+                <div class="security-tips">
+                    <div class="tips-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="11" width="18" height="10" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="tips-text">为确保您的信息安全，需进行身份识别</div>
+                </div>
+                
+                <div class="id-card-upload">
+                    <div class="upload-section">
+                        <div class="upload-title">
+                            <div class="upload-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="2" y="4" width="20" height="14" rx="2" stroke="#1e40af" stroke-width="2" fill="none"/>
+                                    <rect x="5" y="8" width="6" height="4" rx="1" stroke="#1e40af" stroke-width="1.5" fill="none"/>
+                                    <line x1="13" y1="8" x2="18" y2="8" stroke="#1e40af" stroke-width="1.5"/>
+                                    <line x1="13" y1="10" x2="16" y2="10" stroke="#1e40af" stroke-width="1.5"/>
+                                    <line x1="5" y1="14" x2="10" y2="14" stroke="#1e40af" stroke-width="1.5"/>
+                                    <circle cx="7.5" cy="9.5" r="1" fill="#1e40af"/>
+                                </svg>
+                            </div>
+                            请上传身份证正面
+                        </div>
+                        <div class="upload-area" id="frontUpload" onclick="selectIdCard('front')">
+                            <div class="upload-preview">
+                                <img src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80" alt="身份证正面示例" class="id-card-example">
+                                <div class="upload-overlay">
+                                    <div class="upload-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect x="2" y="4" width="20" height="14" rx="2" stroke="#1e40af" stroke-width="2" fill="none"/>
+                                            <rect x="5" y="8" width="6" height="4" rx="1" stroke="#1e40af" stroke-width="1.5" fill="none"/>
+                                            <line x1="13" y1="8" x2="18" y2="8" stroke="#1e40af" stroke-width="1.5"/>
+                                            <line x1="13" y1="10" x2="16" y2="10" stroke="#1e40af" stroke-width="1.5"/>
+                                            <line x1="5" y1="14" x2="10" y2="14" stroke="#1e40af" stroke-width="1.5"/>
+                                            <circle cx="7.5" cy="9.5" r="1" fill="#1e40af"/>
+                                        </svg>
+                                    </div>
+                                    <div class="upload-text">上传身份证正面</div>
+                                    <div class="upload-hint">支持JPG、PNG格式</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-section">
+                        <div class="upload-title">
+                            <div class="upload-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="2" y="4" width="20" height="14" rx="2" stroke="#1e40af" stroke-width="2" fill="none"/>
+                                    <path d="M6 8h12v8H6z" fill="#f8fafc" stroke="#1e40af" stroke-width="1"/>
+                                    <circle cx="19" cy="6" r="2" stroke="#1e40af" stroke-width="1.5" fill="none"/>
+                                    <path d="M8 10h8M8 12h6M8 14h4" stroke="#1e40af" stroke-width="1.2"/>
+                                    <rect x="14" y="11" width="4" height="3" rx="0.5" stroke="#1e40af" stroke-width="1" fill="none"/>
+                                </svg>
+                            </div>
+                            请上传身份证反面
+                        </div>
+                        <div class="upload-area" id="backUpload" onclick="selectIdCard('back')">
+                            <div class="upload-preview">
+                                <img src="https://images.unsplash.com/photo-1604594849809-dfedbc827105?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80" alt="身份证反面示例" class="id-card-example">
+                                <div class="upload-overlay">
+                                    <div class="upload-icon">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                                            <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                                            <line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="2"/>
+                                            <polyline points="9,14 12,11 15,14" stroke="currentColor" stroke-width="2"/>
+                                        </svg>
+                                    </div>
+                                    <div class="upload-text">上传身份证反面</div>
+                                    <div class="upload-hint">支持JPG、PNG格式</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="verification-actions">
+                    <button class="btn btn-primary" id="startFaceBtn" onclick="startFaceRecognition()" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;">
+                            <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1Z" stroke="currentColor" stroke-width="2" fill="rgba(255,255,255,0.2)"/>
+                            <path d="M9 12L11 14L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        开始人脸识别
+                    </button>
+                </div>
+                
+                <input type="file" id="frontCardInput" accept="image/*" style="display: none;" onchange="handleIdCardUpload('front')">
+                <input type="file" id="backCardInput" accept="image/*" style="display: none;" onchange="handleIdCardUpload('back')">
+                
+                <!-- 图片选择模态框 -->
+                <div id="photoSelectorModal" class="photo-selector-modal">
+                    <div class="photo-selector-content" id="photoSelectorContent">
+                        <div class="photo-selector-handle"></div>
+                        <div class="photo-selector-header">
+                            <h3 class="photo-selector-title" id="photoSelectorTitle">选择上传方式</h3>
+                            <button class="photo-selector-close" onclick="closePhotoSelector()">×</button>
+                        </div>
+                        <div class="photo-selector-options">
+                            <button class="photo-option" onclick="selectPhotoFromCamera()">
+                                <div class="photo-option-icon">📷</div>
+                                <div class="photo-option-text">拍照</div>
+                                <div class="photo-option-arrow">›</div>
+                            </button>
+                            <button class="photo-option" onclick="selectPhotoFromGallery()">
+                                <div class="photo-option-icon">🖼️</div>
+                                <div class="photo-option-text">从相册选择</div>
+                                <div class="photo-option-arrow">›</div>
+                            </button>
+                        </div>
+                        <div class="photo-selector-cancel">
+                            <button class="photo-cancel-btn" onclick="closePhotoSelector()">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 人脸识别页面 -->
+        <div id="faceRecognitionModal" class="page">
+            <div class="header">
+                <button class="back-btn" onclick="showPage('faceRecognitionPage')">←</button>
+                <h1>身份安全验证</h1>
+            </div>
+            
+            <div class="face-recognition">
+                <div class="recognition-tips">
+                    验证即将自动开始，请将面部置于取景框内，保持正视摄像头，确保光线充足
+                </div>
+                
+                <div class="face-camera" id="faceCamera">
+                    <div class="face-outline" id="faceOutline"></div>
+                    <span id="cameraIcon">📷</span>
+                    <div class="scanning-line" id="scanningLine" style="display: none;"></div>
+                    <div class="face-detection-status" id="detectionStatus"></div>
+                </div>
+                
+                <div class="recognition-progress" id="recognitionProgress">
+                    <div class="progress-steps">
+                        <div class="progress-step" id="step1"></div>
+                        <div class="progress-step" id="step2"></div>
+                        <div class="progress-step" id="step3"></div>
+                        <div class="progress-step" id="step4"></div>
+                        <div class="progress-step" id="step5"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">准备启动身份验证...</div>
+                </div>
+                
+                <div class="verification-status" id="verificationStatus">
+                    <div class="status-text" id="statusText">正在准备验证环境...</div>
+                </div>
+                
+
+            </div>
+        </div>
+
+
+
+        <!-- 签署成功页面 -->
+        <div id="successPage" class="page">
+            <div class="header">
+                <h1>签署完成</h1>
+            </div>
+            
+            <div style="text-align: center;">
+                <div class="success-icon">✓</div>
+                <div class="success-message">
+                    协议签署成功！<br>
+                    您的协议已生效，感谢您的信任。
+                </div>
+                
+                <button class="btn btn-primary" onclick="showPage('historyPage')">
+                    📋 查看已办事项
+                </button>
+                
+                <button class="btn btn-secondary" onclick="showPage('todoPage')">
+                    🏠 返回首页
+                </button>
+            </div>
+        </div>
+
+        <!-- 已办事项页面 -->
+        <div id="historyPage" class="page">
+            <div class="header">
+                <button class="back-btn" onclick="window.location.reload()">←</button>
+                <h1>已办事项</h1>
+            </div>
+            
+            <div id="historyList">
+                <!-- 动态添加的普惠易贷业务协议记录将显示在这里 -->
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <div class="empty-text">暂无已办事项</div>
+                    <div class="empty-hint">您的办事记录将在此显示</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 拒绝签署页面 -->
+        <div id="rejectPage" class="page">
+            <div class="header">
+                <h1>协议签署结果</h1>
+            </div>
+            
+            <div style="text-align: center; padding: 40px 20px;">
+                <div class="reject-icon">✕</div>
+                <div class="reject-message">
+                    <h2 style="color: #dc2626; margin-bottom: 32px; font-size: 20px;">您已拒绝签署协议</h2>
+                </div>
+                
+                <button class="btn btn-primary" onclick="showPage('todoPage')">
+                    返回首页
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义提示弹窗 -->
+    <div id="toastBackdrop" class="toast-backdrop">
+        <div id="customToast" class="toast">
+            <div id="toastIcon" class="toast-icon"></div>
+            <div id="toastTitle" class="toast-title"></div>
+            <div id="toastMessage" class="toast-message"></div>
+            <button id="toastButton" class="toast-button" onclick="hideToast()">确定</button>
+        </div>
+    </div>
+
+    <!-- 协议内容弹窗 -->
+    <div id="agreementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">协议阅读</div>
+                <button class="modal-close" onclick="closeAgreementModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body" id="modalBody">
+                <!-- 协议内容将在这里动态加载 -->
+            </div>
+            <div id="fixedScrollTip" style="display:none;position:absolute;left:0;right:0;bottom:95px;width:100%;text-align:center;color:#888;font-size:15px;pointer-events:none;z-index:1001;background:linear-gradient(to top,rgba(255,255,255,0.98) 60%,rgba(255,255,255,0));padding:10px 0 8px 0;box-shadow:0 2px 8px rgba(0,0,0,0.04);">↓ 向下滑动阅读更多 ↓</div>
+            <div class="modal-footer">
+                <button class="btn-confirm-read" id="confirmReadBtn" onclick="confirmRead()" disabled>
+                    我已完成阅读
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 拒绝确认弹窗 -->
+    <div id="rejectModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <div class="modal-title">确认拒绝</div>
+                <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 16px; line-height: 1.6; color: #374151;">
+                    您确定要拒绝签署所有协议吗？
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeRejectModal()">取消</button>
+                <button class="btn btn-reject" onclick="confirmReject()">确认拒绝</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 验证码确认弹窗 -->
+    <div id="verificationModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <div class="modal-title"></div>
+                <button class="modal-close" onclick="closeVerificationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 16px; line-height: 1.6; color: #374151; margin-bottom: 24px; text-align: center;">
+                    验证码已发送至手机 <span style="color: #1e40af; font-weight: 600;">138****5678</span>，有效期5分钟
+                </p>
+                <div class="verification-input">
+                    <div class="code-input-container">
+                        <input type="tel" class="code-digit" id="digit1" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="code-digit" id="digit2" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="code-digit" id="digit3" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="code-digit" id="digit4" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="code-digit" id="digit5" maxlength="1" inputmode="numeric">
+                        <input type="tel" class="code-digit" id="digit6" maxlength="1" inputmode="numeric">
+                    </div>
+                    <button class="send-code-btn" id="sendCodeBtn" onclick="sendVerificationCode()">
+                        重新发送验证码
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeVerificationModal()">取消</button>
+                <button class="btn btn-agree" onclick="verifyCode()">确认签署</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态管理
+        let selectedAgreements = new Set(); // 当前选中的协议
+        let readAgreements = new Set(); // 已阅读的协议
+        let processedAgreements = {
+            agreed: new Set(),
+            rejected: new Set()
+        }; // 已处理的协议
+        let currentReadingAgreement = null; // 当前正在阅读的协议
+        
+        let idCardStatus = {
+            front: false,
+            back: false
+        };
+        
+        let uploadedFiles = {
+            front: null,
+            back: null
+        };
+        
+        let countdownTimer = null;
+        let sendCodeTimer = null;
+        let isIdentityVerified = false; // 身份是否已验证
+        let globalCountdownActive = false; // 全局倒计时状态
+
+        // 协议内容数据
+        const agreementContents = {
+            personal: {
+                title: '个人信息使用授权书',
+                content: `
+                    <h3>个人信息使用授权书</h3>
+                    <p><strong>第一条 授权目的</strong></p>
+                    <p>为了更好地为您提供金融服务，提升服务质量，特向您申请个人信息使用授权。</p>
+                    
+                    <p><strong>第二条 授权范围</strong></p>
+                    <p>1. 授权使用您的身份信息、联系方式等基本信息</p>
+                    <p>2. 授权使用您的职业信息、收入状况等经济信息</p>
+                    <p>3. 授权使用您的交易记录、账户信息等业务信息</p>
+                    
+                    <p><strong>第三条 使用目的</strong></p>
+                    <p>1. 用于身份验证和风险控制</p>
+                    <p>2. 用于产品推荐和个性化服务</p>
+                    <p>3. 用于客户关系维护和售后服务</p>
+                    
+                    <p><strong>第四条 信息保护</strong></p>
+                    <p>我们将严格按照相关法律法规保护您的个人信息，采取必要的安全措施防止信息泄露。</p>
+                    
+                    <p><strong>第五条 授权期限</strong></p>
+                    <p>本授权有效期为3年，到期后需重新授权。</p>
+                `
+            },
+            credit: {
+                title: '个人征信业务信息处理授权书',
+                content: `
+                    <h3>个人征信业务信息处理授权书</h3>
+                    <p><strong>第一条 授权目的</strong></p>
+                    <p>为了更好地评估您的信用状况，提供合适的金融产品，特向您申请征信信息处理授权。</p>
+                    
+                    <p><strong>第二条 授权范围</strong></p>
+                    <p>1. 授权查询您在人民银行征信中心的个人信用报告</p>
+                    <p>2. 授权查询您在其他合法征信机构的信用信息</p>
+                    <p>3. 授权将您的信用信息用于风险评估和产品推荐</p>
+                    <p>4. 授权将您的还款记录等信用信息报送征信机构</p>
+                    
+                    <p><strong>第三条 处理目的</strong></p>
+                    <p>1. 用于评估您的信用等级和还款能力</p>
+                    <p>2. 用于制定个性化的金融服务方案</p>
+                    <p>3. 用于风险监控和信用管理</p>
+                    
+                    <p><strong>第四条 信息保护</strong></p>
+                    <p>我们将严格保护您的征信信息，不会向无关第三方泄露，并确保信息处理的安全性。</p>
+                    
+                    <p><strong>第五条 授权期限</strong></p>
+                    <p>本授权有效期为2年，到期后需重新授权。</p>
+                `
+            },
+            business: {
+                title: '业务授权决议',
+                content: `
+                    <h3>业务授权决议</h3>
+                    <p><strong>第一条 授权事项</strong></p>
+                    <p>授权办理各类银行业务，包括但不限于：账户开立、资金转账、投资理财等。</p>
+                    
+                    <p><strong>第二条 授权权限</strong></p>
+                    <p>1. 单笔交易限额：人民币100万元</p>
+                    <p>2. 日累计限额：人民币500万元</p>
+                    <p>3. 投资产品风险等级：R3级以下</p>
+                    
+                    <p><strong>第三条 风险提示</strong></p>
+                    <p>请您充分了解各项业务的风险特征，理性决策，审慎投资。</p>
+                    
+                    <p><strong>第四条 有效期限</strong></p>
+                    <p>本决议自签署之日起生效，有效期为1年。</p>
+                `
+            }
+        };
+
+        // 页面切换功能
+        function showPage(pageId) {
+            // 只有在非协议阅读状态下才停止倒计时
+            const agreementModal = document.getElementById('agreementModal');
+            if (!agreementModal || !agreementModal.classList.contains('active')) {
+                stopAllCountdown();
+            }
+            // 进入签署页面时，始终全选所有协议
+            if (pageId === 'signPage') {
+                selectAllAgreements();
+            }
+            // 隐藏所有页面
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+            // 显示目标页面
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                // 添加渐入动画
+                targetPage.classList.add('fade-in');
+                setTimeout(() => {
+                    targetPage.classList.remove('fade-in');
+                }, 500);
+                // 如果切换到身份识别页面，初始化测试数据
+                if (pageId === 'faceRecognitionPage') {
+                    initIdCardForTesting();
+                }
+            }
+        }
+
+        // 更新协议选择状态
+        function updateAgreementSelection(agreementType) {
+            const checkbox = document.getElementById(`checkbox-${agreementType}`);
+            const card = document.querySelector(`[data-agreement="${agreementType}"]`);
+            
+            // 如果协议已阅读，不允许取消选择
+            if (readAgreements.has(agreementType) && !checkbox.checked) {
+                checkbox.checked = true;
+                return;
+            }
+            
+            if (checkbox.checked) {
+                selectedAgreements.add(agreementType);
+                card.classList.add('selected');
+            } else {
+                selectedAgreements.delete(agreementType);
+                card.classList.remove('selected');
+            }
+            
+            updateButtonStates();
+            updateReadButtonState();
+        }
+
+        // 更新按钮状态
+        function updateButtonStates() {
+            // 已废弃：不再动态更新同意和拒绝按钮状态
+        }
+
+        // 更新阅读按钮状态
+        function updateReadButtonState() {
+            const readBtn = document.getElementById('readAllBtn');
+            const allTypes = ['personal', 'credit', 'business'];
+            const unreadCount = allTypes.filter(type => !readAgreements.has(type)).length;
+            if (selectedAgreements.size === 0) {
+                readBtn.disabled = true;
+                readBtn.textContent = '请选择协议';
+            } else if (unreadCount === 0) {
+                readBtn.disabled = true;
+                readBtn.textContent = '所有协议已阅读';
+            } else {
+                // 只要还有未读协议，不显示"所有协议已阅读"
+                // 但如果选中的协议都是已读，也禁用按钮
+                const selectedUnreadCount = Array.from(selectedAgreements).filter(type => !readAgreements.has(type)).length;
+                if (selectedUnreadCount === 0) {
+                    readBtn.disabled = true;
+                    readBtn.textContent = '请选择未读协议';
+                } else {
+                    readBtn.disabled = false;
+                    readBtn.textContent = '阅读选中的协议';
+                }
+            }
+        }
+
+        // 阅读选中的协议
+        function readSelectedAgreements() {
+            // 只允许阅读未读协议
+            const unreadTypes = Array.from(selectedAgreements).filter(type => !readAgreements.has(type));
+            if (unreadTypes.length === 0) {
+                showToast('info', '提示', '所有选中的协议都已阅读');
+                return;
+            }
+            // 新增：身份认证判断
+            if (!isIdentityVerified) {
+                // 跳转到身份认证页面前，保存当前选择
+                savedSelectedAgreements = new Set(selectedAgreements);
+                // 跳转到身份认证页面
+                showPage('faceRecognitionPage');
+                return;
+            }
+            // 已认证，弹出协议阅读
+            showSelectedAgreementsModal(unreadTypes);
+        }
+
+        // 重置身份证上传状态
+        function resetIdCardStatus() {
+            // 清理已有的文件URL，防止内存泄露
+            Object.keys(uploadedFiles).forEach(key => {
+                if (uploadedFiles[key] && uploadedFiles[key].url) {
+                    URL.revokeObjectURL(uploadedFiles[key].url);
+                }
+            });
+            
+            idCardStatus.front = false;
+            idCardStatus.back = false;
+            uploadedFiles.front = null;
+            uploadedFiles.back = null;
+            
+            // 重置上传状态
+            uploadInProgress.clear();
+            
+            // 重置UI状态
+            const frontUpload = document.getElementById('frontUpload');
+            const backUpload = document.getElementById('backUpload');
+            const startFaceBtn = document.getElementById('startFaceBtn');
+            
+            frontUpload.classList.remove('uploaded', 'uploading');
+            backUpload.classList.remove('uploaded', 'uploading');
+            
+            // 重置正面上传区域
+            frontUpload.innerHTML = `
+                <div class="upload-preview">
+                    <img src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80" alt="身份证正面示例" class="id-card-example">
+                    <div class="upload-overlay">
+                        <div class="upload-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="2" y="4" width="20" height="14" rx="2" stroke="#1e40af" stroke-width="2" fill="none"/>
+                                    <rect x="5" y="8" width="6" height="4" rx="1" stroke="#1e40af" stroke-width="1.5" fill="none"/>
+                                    <line x1="13" y1="8" x2="18" y2="8" stroke="#1e40af" stroke-width="1.5"/>
+                                    <line x1="13" y1="10" x2="16" y2="10" stroke="#1e40af" stroke-width="1.5"/>
+                                    <line x1="5" y1="14" x2="10" y2="14" stroke="#1e40af" stroke-width="1.5"/>
+                                    <circle cx="7.5" cy="9.5" r="1" fill="#1e40af"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">上传身份证正面</div>
+                        <div class="upload-hint">支持JPG、PNG格式</div>
+                    </div>
+                </div>
+            `;
+            
+            // 重置反面上传区域
+            backUpload.innerHTML = `
+                <div class="upload-preview">
+                    <img src="https://images.unsplash.com/photo-1604594849809-dfedbc827105?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80" alt="身份证反面示例" class="id-card-example">
+                    <div class="upload-overlay">
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="2"/>
+                                <polyline points="9,14 12,11 15,14" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">上传身份证反面</div>
+                        <div class="upload-hint">支持JPG、PNG格式</div>
+                    </div>
+                </div>
+            `;
+            
+            startFaceBtn.disabled = true;
+        }
+
+        // 初始化身份证上传状态（用于测试）
+        function initIdCardForTesting() {
+            const frontUpload = document.getElementById('frontUpload');
+            const backUpload = document.getElementById('backUpload');
+            const startFaceBtn = document.getElementById('startFaceBtn');
+            
+            // 模拟已上传状态
+            idCardStatus.front = true;
+            idCardStatus.back = true;
+            
+            // 为正面创建模拟文件信息
+            uploadedFiles.front = {
+                file: null,
+                originalFile: null,
+                name: 'id_card_front.jpg',
+                size: '2.1 MB',
+                originalSize: '2.1 MB',
+                url: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&h=200&q=80'
+            };
+            
+            // 为反面创建模拟文件信息
+            uploadedFiles.back = {
+                file: null,
+                originalFile: null,
+                name: 'id_card_back.jpg',
+                size: '1.8 MB',
+                originalSize: '1.8 MB',
+                url: 'https://images.unsplash.com/photo-1604594849809-dfedbc827105?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&h=200&q=80'
+            };
+            
+            // 更新UI状态
+            frontUpload.classList.add('uploaded');
+            backUpload.classList.add('uploaded');
+            
+            // 显示正面上传成功的预览
+            frontUpload.innerHTML = `
+                <div class="uploaded-preview" onclick="reuploadIdCard('front')">
+                    <img src="${uploadedFiles.front.url}" alt="身份证正面" class="uploaded-image">
+                    <button class="upload-delete-btn" onclick="event.stopPropagation(); deleteIdCard('front')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="upload-success-indicator">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        上传成功
+                    </div>
+                </div>
+            `;
+            
+            // 显示反面上传成功的预览
+            backUpload.innerHTML = `
+                <div class="uploaded-preview" onclick="reuploadIdCard('back')">
+                    <img src="${uploadedFiles.back.url}" alt="身份证反面" class="uploaded-image">
+                    <button class="upload-delete-btn" onclick="event.stopPropagation(); deleteIdCard('back')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="upload-success-indicator">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        上传成功
+                    </div>
+                </div>
+            `;
+            
+            // 启用开始人脸识别按钮
+            startFaceBtn.disabled = false;
+        }
+
+        // 防抖变量 - 跟踪正在上传的类型
+        let uploadInProgress = new Set();
+        let currentUploadType = '';
+        
+        // 选择身份证上传 - 显示图片选择模态框
+        function selectIdCard(type) {
+            // 检查是否正在处理该类型的上传
+            if (uploadInProgress.has(type)) {
+                showToast('info', '请稍候', '正在处理该图片，请稍候');
+                return;
+            }
+            
+            currentUploadType = type;
+            const title = type === 'front' ? '上传身份证正面' : '上传身份证反面';
+            document.getElementById('photoSelectorTitle').textContent = title;
+            showPhotoSelector();
+        }
+
+        // 显示图片选择模态框
+        function showPhotoSelector() {
+            const modal = document.getElementById('photoSelectorModal');
+            const content = document.getElementById('photoSelectorContent');
+            modal.classList.add('active');
+            
+            // 阻止背景滚动
+            document.body.style.overflow = 'hidden';
+            
+            // 添加点击背景关闭功能
+            modal.addEventListener('click', handleModalBackgroundClick);
+            
+            // 添加触摸手势支持
+            addTouchGestures(content);
+        }
+
+        // 关闭图片选择模态框
+        function closePhotoSelector() {
+            const modal = document.getElementById('photoSelectorModal');
+            const content = document.getElementById('photoSelectorContent');
+            
+            modal.classList.remove('active');
+            
+            // 恢复背景滚动
+            document.body.style.overflow = '';
+            
+            // 移除背景点击监听
+            modal.removeEventListener('click', handleModalBackgroundClick);
+            
+            // 重置样式
+            content.style.transform = '';
+            content.style.transition = '';
+            modal.style.backgroundColor = '';
+            
+            // 重置当前上传类型
+            currentUploadType = '';
+        }
+
+        // 处理模态框背景点击
+        function handleModalBackgroundClick(event) {
+            if (event.target === event.currentTarget) {
+                closePhotoSelector();
+            }
+        }
+
+        // 从相机拍照
+        function selectPhotoFromCamera() {
+            // 在移动端，这会优先打开相机
+            const inputId = currentUploadType === 'front' ? 'frontCardInput' : 'backCardInput';
+            const input = document.getElementById(inputId);
+            
+            // 设置capture属性来提示使用相机
+            input.setAttribute('capture', 'environment');
+            input.click();
+            
+            closePhotoSelector();
+            
+            // 添加触觉反馈
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // 从相册选择
+        function selectPhotoFromGallery() {
+            const inputId = currentUploadType === 'front' ? 'frontCardInput' : 'backCardInput';
+            const input = document.getElementById(inputId);
+            
+            // 移除capture属性，让用户从相册选择
+            input.removeAttribute('capture');
+            input.click();
+            
+            closePhotoSelector();
+            
+            // 添加触觉反馈
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // 添加触摸手势支持
+        function addTouchGestures(element) {
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+            let initialTransform = 0;
+
+            function handleTouchStart(e) {
+                startY = e.touches[0].clientY;
+                currentY = startY;
+                isDragging = true;
+                initialTransform = 0;
+                element.style.transition = 'none';
+            }
+
+            function handleTouchMove(e) {
+                if (!isDragging) return;
+                
+                currentY = e.touches[0].clientY;
+                const deltaY = Math.max(0, currentY - startY); // 只允许向下拖拽
+                
+                if (deltaY > 0) {
+                    element.style.transform = `translateY(${deltaY}px)`;
+                    
+                    // 添加阻力效果
+                    const opacity = Math.max(0.3, 1 - deltaY / 300);
+                    element.parentElement.style.backgroundColor = `rgba(0, 0, 0, ${opacity * 0.5})`;
+                }
+            }
+
+            function handleTouchEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                const deltaY = currentY - startY;
+                const threshold = 100; // 拖拽阈值
+                
+                element.style.transition = 'transform 0.3s ease';
+                
+                if (deltaY > threshold) {
+                    // 关闭模态框
+                    closePhotoSelector();
+                } else {
+                    // 回弹
+                    element.style.transform = 'translateY(0)';
+                    element.parentElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                }
+            }
+
+            // 绑定触摸事件
+            element.addEventListener('touchstart', handleTouchStart, { passive: false });
+            element.addEventListener('touchmove', handleTouchMove, { passive: false });
+            element.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+
+        // 处理身份证上传
+        async function handleIdCardUpload(type) {
+            const inputId = type === 'front' ? 'frontCardInput' : 'backCardInput';
+            const input = document.getElementById(inputId);
+            const file = input.files[0];
+            
+            if (!file) return;
+            
+            // 防止重复处理该类型
+            if (uploadInProgress.has(type)) {
+                return;
+            }
+            
+            uploadInProgress.add(type);
+            
+            // 验证文件类型 - 更严格的检查
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type.toLowerCase())) {
+                showToast('error', '文件格式错误', '请选择JPG、PNG或WebP格式的图片文件');
+                uploadInProgress.delete(type);
+                return;
+            }
+            
+            // 验证文件大小（限制为10MB，因为会压缩）
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('error', '文件过大', '图片大小不能超过10MB，请选择较小的图片');
+                uploadInProgress.delete(type);
+                return;
+            }
+            
+            // 显示上传中状态
+            const uploadArea = document.getElementById(type === 'front' ? 'frontUpload' : 'backUpload');
+            const isfront = type === 'front';
+            
+            showUploadingState(uploadArea, isfront);
+            
+            // 添加触觉反馈
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            
+            try {
+                // 异步压缩图片，根据文件大小调整压缩参数
+                const quality = file.size > 2 * 1024 * 1024 ? 0.7 : 0.8; // 大于2MB时使用更高压缩
+                const maxWidth = file.size > 5 * 1024 * 1024 ? 1000 : 1200; // 大于5MB时限制更小尺寸
+                const compressedFile = await compressImage(file, quality, maxWidth);
+                
+                // 创建预览URL
+                const previewUrl = URL.createObjectURL(compressedFile);
+                
+                // 存储文件信息
+                uploadedFiles[type] = {
+                    file: compressedFile,
+                    originalFile: file,
+                    name: file.name,
+                    size: formatFileSize(compressedFile.size),
+                    originalSize: formatFileSize(file.size),
+                    url: previewUrl
+                };
+                
+                // 模拟网络上传延迟
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                // 更新状态
+                idCardStatus[type] = true;
+                uploadArea.classList.remove('uploading');
+                uploadArea.classList.add('uploaded');
+                
+                // 显示预览效果
+                showUploadedPreview(type);
+                
+                // 检查是否两张都已上传
+                checkUploadComplete();
+                
+                // 重置文件输入
+                input.value = '';
+                
+                // 清除防抖状态
+                uploadInProgress.delete(type);
+                
+            } catch (error) {
+                console.error('图片处理失败:', error);
+                showToast('error', '处理失败', '图片处理失败，请重试');
+                
+                // 重置上传区域
+                resetUploadArea(uploadArea, isfront);
+                
+                // 清除防抖状态
+                uploadInProgress.delete(type);
+            }
+        }
+
+        // 显示上传中状态
+        function showUploadingState(uploadArea, isfront) {
+            const sampleImage = isfront ? 
+                'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80' :
+                'https://images.unsplash.com/photo-1604594849809-dfedbc827105?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80';
+            
+            uploadArea.classList.add('uploading');
+            uploadArea.innerHTML = `
+                <div class="upload-preview">
+                    <img src="${sampleImage}" alt="身份证${isfront ? '正面' : '反面'}示例" class="id-card-example">
+                    <div class="upload-overlay">
+                        <div class="upload-icon upload-spinner">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">正在处理...</div>
+                        <div class="upload-hint">请稍候</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 图片压缩函数
+        function compressImage(file, quality = 0.8, maxWidth = 1200) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    // 使用 requestAnimationFrame 确保UI响应性
+                    requestAnimationFrame(() => {
+                        try {
+                            // 计算压缩后的尺寸
+                            let { width, height } = calculateCompressedSize(img.width, img.height, maxWidth);
+                            
+                            // 设置canvas尺寸
+                            canvas.width = width;
+                            canvas.height = height;
+                            
+                            // 绘制压缩后的图片
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // 转换为blob
+                            canvas.toBlob((blob) => {
+                                if (blob) {
+                                    // 创建新的File对象
+                                    const compressedFile = new File([blob], file.name, {
+                                        type: file.type,
+                                        lastModified: Date.now()
+                                    });
+                                    
+                                    // 清理临时创建的图片URL
+                                    URL.revokeObjectURL(img.src);
+                                    
+                                    resolve(compressedFile);
+                                } else {
+                                    URL.revokeObjectURL(img.src);
+                                    reject(new Error('图片压缩失败，请重试'));
+                                }
+                            }, file.type, quality);
+                            
+                        } catch (error) {
+                            URL.revokeObjectURL(img.src);
+                            reject(new Error('图片处理失败: ' + error.message));
+                        }
+                    });
+                };
+                
+                img.onerror = function() {
+                    reject(new Error('图片加载失败'));
+                };
+                
+                // 异步加载图片
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // 计算压缩后尺寸
+        function calculateCompressedSize(originalWidth, originalHeight, maxWidth) {
+            if (originalWidth <= maxWidth && originalHeight <= maxWidth) {
+                return { width: originalWidth, height: originalHeight };
+            }
+            
+            const ratio = Math.min(maxWidth / originalWidth, maxWidth / originalHeight);
+            return {
+                width: Math.round(originalWidth * ratio),
+                height: Math.round(originalHeight * ratio)
+            };
+        }
+
+        // 重置上传区域
+        function resetUploadArea(uploadArea, isfront) {
+            const sampleImage = isfront ? 
+                'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80' :
+                'https://images.unsplash.com/photo-1604594849809-dfedbc827105?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80';
+            
+            uploadArea.classList.remove('uploading', 'uploaded');
+            uploadArea.innerHTML = `
+                <div class="upload-preview">
+                    <img src="${sampleImage}" alt="身份证${isfront ? '正面' : '反面'}示例" class="id-card-example">
+                    <div class="upload-overlay">
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="2"/>
+                                <polyline points="9,14 12,11 15,14" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">上传身份证${isfront ? '正面' : '反面'}</div>
+                        <div class="upload-hint">支持JPG、PNG格式</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 显示上传成功的预览
+        function showUploadedPreview(type) {
+            const uploadArea = document.getElementById(type === 'front' ? 'frontUpload' : 'backUpload');
+            const fileInfo = uploadedFiles[type];
+            const isfront = type === 'front';
+            
+            uploadArea.innerHTML = `
+                <div class="uploaded-preview" onclick="reuploadIdCard('${type}')">
+                    <img src="${fileInfo.url}" alt="身份证${isfront ? '正面' : '反面'}" class="uploaded-image">
+                    <button class="upload-delete-btn" onclick="event.stopPropagation(); deleteIdCard('${type}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="upload-success-indicator">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        上传成功
+                    </div>
+                </div>
+            `;
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 重新上传身份证（点击预览图片时触发）
+        function reuploadIdCard(type) {
+            selectIdCard(type);
+        }
+
+        // 删除身份证
+        function deleteIdCard(type) {
+            // 直接执行删除操作，无需弹窗确认
+            executeDelete(type);
+        }
+        
+        // 执行删除操作
+        function executeDelete(type) {
+            // 清理文件URL
+            if (uploadedFiles[type] && uploadedFiles[type].url) {
+                URL.revokeObjectURL(uploadedFiles[type].url);
+            }
+            
+            // 重置状态
+            idCardStatus[type] = false;
+            uploadedFiles[type] = null;
+            
+            // 重置UI
+            const uploadArea = document.getElementById(type === 'front' ? 'frontUpload' : 'backUpload');
+            const isfront = type === 'front';
+            const sampleImage = isfront ? 
+                'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80' :
+                'https://images.unsplash.com/photo-1604594849809-dfedbc827105?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&h=100&q=80';
+            
+            uploadArea.classList.remove('uploaded', 'uploading');
+            uploadArea.innerHTML = `
+                <div class="upload-preview">
+                    <img src="${sampleImage}" alt="身份证${isfront ? '正面' : '反面'}示例" class="id-card-example">
+                    <div class="upload-overlay">
+                        <div class="upload-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                                <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                                <line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="2"/>
+                                <polyline points="9,14 12,11 15,14" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">上传身份证${isfront ? '正面' : '反面'}</div>
+                        <div class="upload-hint">支持JPG、PNG格式</div>
+                    </div>
+                </div>
+            `;
+            
+            // 重新检查上传状态
+            checkUploadComplete();
+            
+            // 重置toast按钮行为
+            const toastButton = document.getElementById('toastButton');
+            toastButton.onclick = function() {
+                hideToast();
+            };
+        }
+
+        // 检查上传完成状态
+        function checkUploadComplete() {
+            const startFaceBtn = document.getElementById('startFaceBtn');
+            
+            if (idCardStatus.front && idCardStatus.back) {
+                startFaceBtn.disabled = false;
+            }
+        }
+
+        // 开始身份验证（整个流程）
+        function startFaceRecognition() {
+            if (!idCardStatus.front || !idCardStatus.back) {
+                showToast('warning', '信息不完整', '请先上传身份证正面和反面照片');
+                return;
+            }
+            
+            // 重置人脸识别状态
+            resetFaceRecognitionStatus();
+            
+            // 添加触觉反馈
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+            
+            // 直接跳转并开始验证流程
+            showPage('faceRecognitionModal');
+            
+            // 延迟500ms后自动开始验证，让用户看到界面
+            setTimeout(() => {
+                startRecognitionProcess();
+            }, 500);
+        }
+
+        // 重置人脸识别状态
+        function resetFaceRecognitionStatus() {
+            const camera = document.getElementById('faceCamera');
+            const cameraIcon = document.getElementById('cameraIcon');
+            const faceOutline = document.getElementById('faceOutline');
+            const detectionStatus = document.getElementById('detectionStatus');
+            const scanningLine = document.getElementById('scanningLine');
+            const progress = document.getElementById('recognitionProgress');
+            const statusText = document.getElementById('statusText');
+            const progressText = document.getElementById('progressText');
+            
+            // 重置摄像头状态
+            camera.classList.remove('detecting', 'scanning', 'success');
+            faceOutline.classList.remove('active', 'success');
+            detectionStatus.classList.remove('show');
+            scanningLine.style.display = 'none';
+            
+            // 重置UI元素
+            progress.style.display = 'block';
+            statusText.textContent = '正在准备验证环境...';
+            cameraIcon.textContent = '📷';
+            progressText.textContent = '准备启动身份验证...';
+            
+            // 重置进度步骤
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById(`step${i}`);
+                if (step) {
+                    step.classList.remove('active', 'completed');
+                }
+            }
+        }
+
+
+
+        // 开始人脸识别流程
+        function startRecognitionProcess() {
+            const progress = document.getElementById('recognitionProgress');
+            const statusText = document.getElementById('statusText');
+            
+            // 重置状态
+            progress.style.display = 'block';
+            statusText.textContent = '正在启动身份验证系统...';
+            
+            // 清除所有进度状态
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById(`step${i}`);
+                step.classList.remove('active', 'completed');
+            }
+            
+            // 开始检测流程
+            executeRecognitionSteps();
+        }
+        
+        // 执行识别步骤
+        function executeRecognitionSteps() {
+            const steps = [
+                { name: '正在启动摄像头...', duration: 800, icon: '📷' },
+                { name: '检测人脸位置...', duration: 1200, icon: '🔍' },
+                { name: '分析面部特征...', duration: 1500, icon: '🧠' },
+                { name: '验证身份信息...', duration: 1000, icon: '🔐' },
+                { name: '完成识别验证...', duration: 800, icon: '✓' }
+            ];
+            
+            let currentStep = 0;
+            
+            function nextStep() {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    updateRecognitionStep(currentStep + 1, step.name, step.icon);
+                    
+                    setTimeout(() => {
+                        // 标记当前步骤完成
+                        document.getElementById(`step${currentStep + 1}`).classList.remove('active');
+                        document.getElementById(`step${currentStep + 1}`).classList.add('completed');
+                        
+                        currentStep++;
+                        nextStep();
+                    }, step.duration);
+                } else {
+                    // 所有步骤完成，识别成功
+                    handleRecognitionSuccess();
+                }
+            }
+            
+            nextStep();
+        }
+        
+        // 更新识别步骤
+        function updateRecognitionStep(stepNumber, statusText, icon) {
+            const camera = document.getElementById('faceCamera');
+            const cameraIcon = document.getElementById('cameraIcon');
+            const detectionStatus = document.getElementById('detectionStatus');
+            const progressText = document.getElementById('progressText');
+            const faceOutline = document.getElementById('faceOutline');
+            const scanningLine = document.getElementById('scanningLine');
+            
+            // 更新进度指示器
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+            progressText.textContent = statusText;
+            cameraIcon.textContent = icon;
+            
+            // 更新摄像头状态
+            camera.classList.remove('detecting', 'scanning', 'success', 'failed');
+            faceOutline.classList.remove('active', 'success', 'failed');
+            detectionStatus.classList.remove('show');
+            scanningLine.style.display = 'none';
+            
+            if (stepNumber === 1) {
+                // 启动摄像头
+                camera.classList.add('detecting');
+                detectionStatus.textContent = '正在启动摄像头...';
+                detectionStatus.classList.add('show');
+            } else if (stepNumber === 2) {
+                // 检测人脸位置
+                camera.classList.add('detecting');
+                faceOutline.classList.add('active');
+                detectionStatus.textContent = '请将面部对准取景框';
+                detectionStatus.classList.add('show');
+            } else if (stepNumber === 3 || stepNumber === 4) {
+                // 扫描分析
+                camera.classList.add('scanning');
+                faceOutline.classList.add('active');
+                scanningLine.style.display = 'block';
+                detectionStatus.textContent = stepNumber === 3 ? '正在分析面部特征...' : '正在验证身份...';
+                detectionStatus.classList.add('show');
+            } else if (stepNumber === 5) {
+                // 识别完成
+                camera.classList.add('success');
+                faceOutline.classList.add('success');
+                detectionStatus.textContent = '识别成功！';
+                detectionStatus.classList.add('show');
+            }
+        }
+        
+        // 处理识别成功
+        function handleRecognitionSuccess() {
+            const cameraIcon = document.getElementById('cameraIcon');
+            const progress = document.getElementById('recognitionProgress');
+            const statusText = document.getElementById('statusText');
+            
+            statusText.textContent = '身份验证成功！';
+            cameraIcon.textContent = '✅';
+            
+            // 标记身份已验证
+            isIdentityVerified = true;
+            
+            setTimeout(() => {
+                // 更新状态文本
+                statusText.textContent = '身份验证完成，即将跳转...';
+                
+                setTimeout(() => {
+                    // 跳转到协议签署页面
+                    showPage('signPage');
+                    setTimeout(() => {
+                        // 新增：恢复用户选择
+                        if (savedSelectedAgreements) {
+                            // 先清空所有选中
+                            const agreementTypes = ['personal', 'credit', 'business'];
+                            agreementTypes.forEach(type => {
+                                const checkbox = document.getElementById(`checkbox-${type}`);
+                                const card = document.querySelector(`[data-agreement="${type}"]`);
+                                if (checkbox && !checkbox.disabled) {
+                                    checkbox.checked = false;
+                                    card.classList.remove('selected');
+                                }
+                            });
+                            selectedAgreements.clear();
+                            savedSelectedAgreements.forEach(type => {
+                                const checkbox = document.getElementById(`checkbox-${type}`);
+                                const card = document.querySelector(`[data-agreement="${type}"]`);
+                                if (checkbox && !checkbox.disabled) {
+                                    checkbox.checked = true;
+                                    selectedAgreements.add(type);
+                                    card.classList.add('selected');
+                                }
+                            });
+                            updateButtonStates();
+                            updateReadButtonState();
+                        }
+                        // 自动弹出协议阅读（只弹未读协议）
+                        readSelectedAgreements();
+                        // 清空保存
+                        savedSelectedAgreements = null;
+                    }, 300);
+                }, 1000);
+            }, 1500);
+        }
+        
+
+
+        // 显示选中协议的内容弹窗
+        function showSelectedAgreementsModal(agreementTypes) {
+            // 只展示未读协议内容
+            agreementTypes = agreementTypes || Array.from(selectedAgreements).filter(type => !readAgreements.has(type));
+            if (!agreementTypes || agreementTypes.length === 0) return;
+            const modal = document.getElementById('agreementModal');
+            const body = document.getElementById('modalBody');
+            const confirmBtn = document.getElementById('confirmReadBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            const fixedTip = document.getElementById('fixedScrollTip');
+            // 合并所有未读协议内容
+            let mergedContent = '';
+            agreementTypes.forEach(type => {
+                mergedContent += `<div style='margin-bottom:32px;'>${agreementContents[type].content}</div>`;
+            });
+            // 设置标题
+            modalTitle.textContent = '协议阅读';
+            // 填充内容
+            body.innerHTML = mergedContent;
+            // 重置滚动位置到顶部
+            setTimeout(() => {
+                body.scrollTop = 0;
+                // 显示底部提示
+                if (fixedTip) fixedTip.style.display = '';
+                // 检查是否需要隐藏提示
+                checkScrollTip();
+            }, 0);
+            
+            // 检查是否需要倒计时
+            const allRead = agreementTypes.every(type => readAgreements.has(type));
+            console.log('协议阅读状态检查:', {
+                agreementTypes: agreementTypes,
+                readAgreements: Array.from(readAgreements),
+                allRead: allRead
+            });
+            
+            if (allRead) {
+                // 所有协议都已阅读，直接启用按钮
+                console.log('所有协议已阅读，直接启用按钮');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '我已完成阅读';
+            } else {
+                // 有未阅读的协议，需要倒计时
+                console.log('有未阅读协议，启动倒计时');
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = '我已完成阅读';
+                startCountdown();
+            }
+            
+            // 显示弹窗
+            modal.classList.add('active');
+            // 绑定滚动事件
+            body.onscroll = checkScrollTip;
+            function checkScrollTip() {
+                if (!fixedTip) return;
+                // 判断是否滚动到底部
+                if (body.scrollTop + body.clientHeight >= body.scrollHeight - 2) {
+                    fixedTip.style.display = 'none';
+                } else {
+                    fixedTip.style.display = '';
+                }
+            }
+        }
+
+        // 停止所有倒计时
+        function stopAllCountdown() {
+            console.log('=== 停止倒计时函数 ===');
+            
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                console.log('清除倒计时定时器');
+            }
+            
+            globalCountdownActive = false;
+            console.log('重置全局倒计时状态');
+            
+            // 重置按钮状态
+            const confirmBtn = document.getElementById('confirmReadBtn');
+            if (confirmBtn) {
+                const agreementTypes = Array.from(selectedAgreements);
+                confirmBtn.textContent = '我已完成阅读';
+                confirmBtn.disabled = false;
+                console.log('重置按钮状态为已读:', confirmBtn.textContent);
+            } else {
+                console.log('确认按钮未找到，无法重置状态');
+            }
+        }
+
+        // 开始倒计时
+        function startCountdown() {
+            console.log('=== 开始倒计时函数 ===');
+            
+            // 清除可能存在的旧定时器
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+                console.log('清除旧定时器');
+            }
+            
+            // 重置全局状态
+            globalCountdownActive = false;
+            
+            const confirmBtn = document.getElementById('confirmReadBtn');
+            const agreementTypes = Array.from(selectedAgreements);
+            
+            if (!confirmBtn) {
+                console.error('确认按钮未找到');
+                return;
+            }
+            
+            console.log('开始倒计时，协议数量:', agreementTypes.length);
+            console.log('确认按钮状态:', {
+                text: confirmBtn.textContent,
+                disabled: confirmBtn.disabled
+            });
+            
+            globalCountdownActive = true;
+            let seconds = 5;
+            
+            // 初始显示
+            confirmBtn.textContent = `即将完成阅读(${seconds}s)`;
+            confirmBtn.disabled = true;
+            console.log('设置初始倒计时状态:', confirmBtn.textContent);
+            
+            countdownTimer = setInterval(() => {
+                seconds--;
+                console.log('倒计时进行中:', seconds);
+                
+                if (seconds > 0) {
+                    confirmBtn.textContent = `即将完成阅读(${seconds}s)`;
+                    console.log('更新倒计时显示:', confirmBtn.textContent);
+                } else {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    globalCountdownActive = false;
+                    confirmBtn.textContent = '我已完成阅读';
+                    confirmBtn.disabled = false;
+                    console.log('倒计时完成，按钮已启用');
+                }
+            }, 1000);
+            
+            console.log('倒计时定时器已设置');
+        }
+
+        // 切换协议tab
+        function switchAgreementTab(agreementType) {
+            const body = document.getElementById('modalBody');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const confirmBtn = document.getElementById('confirmReadBtn');
+            
+            // 更新tab按钮状态
+            tabButtons.forEach((button, index) => {
+                button.classList.remove('active');
+                const agreementTypes = Array.from(selectedAgreements);
+                if (agreementTypes[index] === agreementType) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // 显示对应协议内容
+            body.innerHTML = agreementContents[agreementType].content;
+            currentReadingAgreement = agreementType;
+            
+            // 重置滚动位置
+            body.scrollTop = 0;
+            
+            // 保持按钮状态不变，不重新启动倒计时
+            // 倒计时状态由全局状态控制
+        }
+
+        // 确认已读
+        function confirmRead() {
+            // 停止当前倒计时
+            stopAllCountdown();
+            // 将所有选中的协议标记为已读，但不移除选中状态
+            selectedAgreements.forEach(type => {
+                readAgreements.add(type);
+                const checkbox = document.getElementById(`checkbox-${type}`);
+                const card = document.querySelector(`[data-agreement="${type}"]`);
+                if (checkbox && !checkbox.checked) {
+                    checkbox.checked = true;
+                    card.classList.add('selected');
+                }
+                checkbox.disabled = true;
+            });
+            // 不再移除 selectedAgreements 中的协议
+            // 关闭弹窗
+            closeAgreementModal();
+            // 阅读完成后直接解锁同意按钮
+            var agreeBtn = document.getElementById('agreeSelectedBtn');
+            if (agreeBtn) agreeBtn.disabled = false;
+            // 阅读完成后更新阅读按钮状态
+            updateReadButtonState();
+        }
+
+
+
+        // 关闭协议弹窗
+        function closeAgreementModal() {
+            const modal = document.getElementById('agreementModal');
+            const body = document.getElementById('modalBody');
+            const confirmBtn = document.getElementById('confirmReadBtn');
+            
+            modal.classList.remove('active');
+            
+            // 停止所有倒计时
+            stopAllCountdown();
+            
+            // 重置滚动位置
+            body.scrollTop = 0;
+            
+            // 重置当前阅读协议
+            currentReadingAgreement = null;
+        }
+
+        // 同意选中的协议
+        function agreeSelectedAgreements() {
+            // 只要有已读协议即可同意
+            if (readAgreements.size === 0) {
+                showToast('warning', '温馨提示', '请先阅读并选择需要同意的协议');
+                return;
+            }
+            // 临时将 selectedAgreements 设为已读协议用于后续流程
+            selectedAgreements = new Set(readAgreements);
+            // 显示验证码确认弹窗
+            showVerificationModal('agree');
+        }
+
+        // 拒绝选中的协议
+        function rejectSelectedAgreements() {
+            if (selectedAgreements.size === 0) {
+                showToast('warning', '温馨提示', '请先选择需要拒绝的协议');
+                return;
+            }
+            // 显示确认拒绝弹窗
+            showRejectConfirmModal();
+        }
+
+        // 显示拒绝确认弹窗
+        function showRejectConfirmModal() {
+            const modal = document.getElementById('rejectModal');
+            const modalBody = modal.querySelector('.modal-body p');
+            const count = selectedAgreements.size;
+            const agreementNames = Array.from(selectedAgreements).map(type => agreementContents[type].title).join('、');
+            
+            modalBody.innerHTML = `您确定要拒绝以下${count}个协议吗？<br><br><strong>${agreementNames}</strong>`;
+            modal.classList.add('active');
+        }
+
+        // 确认拒绝
+        function confirmReject() {
+            // 将选中的协议添加到拒绝列表
+            selectedAgreements.forEach(type => {
+                processedAgreements.rejected.add(type);
+            });
+            
+            closeRejectModal();
+            
+            // 添加拒绝记录到已办事项
+            addProcessedRecord('rejected');
+            
+            // 清除选中状态
+            clearSelections();
+            
+            // 跳转到已办事项页面
+            showPage('historyPage');
+        }
+
+        // 关闭拒绝确认弹窗
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.remove('active');
+        }
+
+        // 显示验证码弹窗
+        function showVerificationModal(actionType) {
+            const modal = document.getElementById('verificationModal');
+            const title = modal.querySelector('.modal-title');
+            const count = selectedAgreements.size;
+            
+            title.textContent = actionType === 'agree' ? `确认同意协议(${count})` : `确认操作(${count})`;
+            
+            modal.classList.add('active');
+            modal.setAttribute('data-action', actionType);
+            
+            // 清空之前的输入
+            clearVerificationCode();
+            // 自动发送验证码
+            sendVerificationCode();
+            // 聚焦到第一个输入框
+            setTimeout(() => {
+                document.getElementById('digit1').focus();
+            }, 300);
+        }
+
+        // 发送验证码
+        function sendVerificationCode() {
+            const sendBtn = document.getElementById('sendCodeBtn');
+            let seconds = 60;
+            
+            sendBtn.disabled = true;
+            sendBtn.textContent = `${seconds}秒后重新发送`;
+            
+            sendCodeTimer = setInterval(() => {
+                seconds--;
+                sendBtn.textContent = `${seconds}秒后重新发送`;
+                
+                if (seconds <= 0) {
+                    clearInterval(sendCodeTimer);
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = '重新发送验证码';
+                }
+            }, 1000);
+            
+
+        }
+
+        // 验证验证码
+        function verifyCode() {
+            const code = getVerificationCode();
+            
+            if (!code || code.length !== 6) {
+                showCodeError();
+                showToast('warning', '输入提醒', '请输入6位数字验证码');
+                return;
+            }
+            
+            // 模拟验证码验证（这里简单验证123456）
+            if (code === '123456') {
+                const modal = document.getElementById('verificationModal');
+                const actionType = modal.getAttribute('data-action');
+                
+                closeVerificationModal();
+                
+                if (actionType === 'agree') {
+                    // 将选中的协议添加到同意列表
+                    selectedAgreements.forEach(type => {
+                        processedAgreements.agreed.add(type);
+                    });
+                    
+                    // 添加同意记录到已办事项
+                    addProcessedRecord('agreed');
+                }
+                
+                // 清除选中状态
+                clearSelections();
+                
+                // 跳转到已办事项页面
+                showPage('historyPage');
+            } else {
+                showCodeError();
+                showToast('error', '验证失败', '验证码错误，请重新输入');
+            }
+        }
+
+        // 获取验证码值
+        function getVerificationCode() {
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                const digit = document.getElementById(`digit${i}`).value;
+                code += digit;
+            }
+            return code;
+        }
+
+        // 显示验证码错误状态
+        function showCodeError() {
+            for (let i = 1; i <= 6; i++) {
+                const digit = document.getElementById(`digit${i}`);
+                digit.classList.add('error');
+                setTimeout(() => {
+                    digit.classList.remove('error');
+                }, 500);
+            }
+        }
+
+        // 清空验证码
+        function clearVerificationCode() {
+            for (let i = 1; i <= 6; i++) {
+                const digit = document.getElementById(`digit${i}`);
+                digit.value = '';
+                digit.classList.remove('filled', 'error');
+            }
+            document.getElementById('digit1').focus();
+        }
+
+        // 关闭验证码弹窗
+        function closeVerificationModal() {
+            document.getElementById('verificationModal').classList.remove('active');
+            if (sendCodeTimer) {
+                clearInterval(sendCodeTimer);
+                sendCodeTimer = null;
+            }
+        }
+
+        // 清除选中状态
+        function clearSelections() {
+            selectedAgreements.forEach(type => {
+                const checkbox = document.getElementById(`checkbox-${type}`);
+                const card = document.querySelector(`[data-agreement="${type}"]`);
+                
+                // 只清除未阅读协议的选中状态
+                if (!readAgreements.has(type)) {
+                    if (checkbox) checkbox.checked = false;
+                    if (card) card.classList.remove('selected');
+                }
+            });
+            
+            // 重新计算选中的协议（保留已阅读的协议）
+            selectedAgreements.clear();
+            readAgreements.forEach(type => {
+                selectedAgreements.add(type);
+                const checkbox = document.getElementById(`checkbox-${type}`);
+                const card = document.querySelector(`[data-agreement="${type}"]`);
+                if (checkbox) checkbox.checked = true;
+                if (card) card.classList.add('selected');
+            });
+            
+            updateButtonStates();
+            updateReadButtonState();
+        }
+
+        // 默认全选所有协议
+        function selectAllAgreements() {
+            const agreementTypes = ['personal', 'credit', 'business'];
+            
+            agreementTypes.forEach(type => {
+                const checkbox = document.getElementById(`checkbox-${type}`);
+                const card = document.querySelector(`[data-agreement="${type}"]`);
+                
+                if (checkbox && !checkbox.disabled) {
+                    checkbox.checked = true;
+                    selectedAgreements.add(type);
+                    card.classList.add('selected');
+                }
+            });
+            
+            updateButtonStates();
+            updateReadButtonState();
+        }
+
+        // 添加处理记录到已办事项
+        function addProcessedRecord(actionType) {
+            const historyList = document.getElementById('historyList');
+            const emptyState = document.getElementById('emptyState');
+            const currentTime = new Date();
+            const timeString = currentTime.getFullYear() + '-' + 
+                             String(currentTime.getMonth() + 1).padStart(2, '0') + '-' + 
+                             String(currentTime.getDate()).padStart(2, '0') + ' ' +
+                             String(currentTime.getHours()).padStart(2, '0') + ':' +
+                             String(currentTime.getMinutes()).padStart(2, '0');
+            
+            // 隐藏空状态提示
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
+            // 获取处理的协议信息
+            const processedTypes = actionType === 'agreed' ? 
+                Array.from(processedAgreements.agreed) : 
+                Array.from(processedAgreements.rejected);
+            
+            // 合并多个协议为一个已办事项（同意和拒绝都合并）
+            const newRecord = document.createElement('div');
+            newRecord.className = 'history-item';
+            newRecord.setAttribute('data-type', 'agreement');
+            newRecord.setAttribute('data-agreements', processedTypes.join(','));
+            
+            const agreementNames = processedTypes.map(type => agreementContents[type].title).join('、');
+            const statusText = actionType === 'agreed' ? '已同意' : '已拒绝';
+            const statusClass = actionType === 'agreed' ? 'status-confirmed' : 'status-rejected';
+            const titleText = actionType === 'agreed' ? '普惠易贷协议签署' : '普惠易贷协议处理';
+            
+            newRecord.innerHTML = `
+                <div class="history-title">${titleText}</div>
+                <div class="history-details">
+                    <span>${timeString}</span>
+                    <span class="${statusClass}">${statusText}</span>
+                </div>
+                <div style="font-size: 13px; color: #64748b; margin-top: 8px;">
+                    包含：${agreementNames}
+                </div>
+            `;
+            
+            // 添加到列表顶部
+            historyList.insertBefore(newRecord, historyList.firstChild);
+            
+            // 不显示处理结果提示
+        }
+
+
+
+        // 自定义Toast弹窗函数
+        function showToast(type, title, message, buttonText = '确定') {
+            const backdrop = document.getElementById('toastBackdrop');
+            const toast = document.getElementById('customToast');
+            const icon = document.getElementById('toastIcon');
+            const titleEl = document.getElementById('toastTitle');
+            const messageEl = document.getElementById('toastMessage');
+            const button = document.getElementById('toastButton');
+
+            // 设置图标
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+
+            // 重置类名
+            icon.className = `toast-icon ${type}`;
+            icon.textContent = icons[type] || icons.info;
+            
+            // 设置内容
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            button.textContent = buttonText;
+
+            // 显示弹窗
+            backdrop.style.display = 'block';
+            setTimeout(() => {
+                backdrop.classList.add('show');
+                toast.classList.add('show');
+            }, 10);
+
+            // 触觉反馈
+            if (navigator.vibrate) {
+                if (type === 'error') {
+                    navigator.vibrate([100, 50, 100]);
+                } else {
+                    navigator.vibrate(50);
+                }
+            }
+        }
+
+        function hideToast() {
+            const backdrop = document.getElementById('toastBackdrop');
+            const toast = document.getElementById('customToast');
+
+            backdrop.classList.remove('show');
+            toast.classList.remove('show');
+
+            setTimeout(() => {
+                backdrop.style.display = 'none';
+            }, 300);
+        }
+
+        // 替换系统alert的便捷函数
+        function customAlert(message, type = 'info', title = '提示') {
+            showToast(type, title, message);
+        }
+
+        // 初始化
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const directToSign = urlParams.get('direct');
+            
+            if (directToSign === 'sign') {
+                showPage('signPage');
+            }
+
+            // 初始化按钮状态
+            updateButtonStates();
+            updateReadButtonState();
+
+            // 初始化验证码输入
+            initVerificationCodeInput();
+            
+                    // 为协议卡片添加点击事件（可选择协议）
+        document.querySelectorAll('.agreement-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // 如果点击的是复选框，不需要额外处理
+                if (e.target.matches('input[type="checkbox"]') || e.target.matches('.agreement-checkbox-label')) {
+                    return;
+                }
+                
+                // 点击卡片其他区域时，切换复选框状态
+                const agreementType = card.getAttribute('data-agreement');
+                const checkbox = document.getElementById(`checkbox-${agreementType}`);
+                if (checkbox && !checkbox.disabled) {
+                    checkbox.checked = !checkbox.checked;
+                    updateAgreementSelection(agreementType);
+                }
+            });
+        });
+        });
+
+        // 初始化验证码输入功能
+        function initVerificationCodeInput() {
+            for (let i = 1; i <= 6; i++) {
+                const digit = document.getElementById(`digit${i}`);
+                
+                // 输入事件
+                digit.addEventListener('input', function(e) {
+                    const value = e.target.value;
+                    
+                    // 只允许数字
+                    if (!/^\d$/.test(value)) {
+                        e.target.value = '';
+                        return;
+                    }
+                    
+                    // 添加填充状态
+                    if (value) {
+                        e.target.classList.add('filled');
+                        // 自动跳转到下一个输入框
+                        if (i < 6) {
+                            document.getElementById(`digit${i + 1}`).focus();
+                        }
+                    } else {
+                        e.target.classList.remove('filled');
+                    }
+                    
+                    // 移除错误状态
+                    e.target.classList.remove('error');
+                });
+                
+                // 键盘事件
+                digit.addEventListener('keydown', function(e) {
+                    // 退格键处理
+                    if (e.key === 'Backspace' && !e.target.value && i > 1) {
+                        const prevDigit = document.getElementById(`digit${i - 1}`);
+                        prevDigit.focus();
+                        prevDigit.value = '';
+                        prevDigit.classList.remove('filled');
+                    }
+                    
+                    // 粘贴处理
+                    if (e.key === 'v' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        navigator.clipboard.readText().then(text => {
+                            const numbers = text.replace(/\D/g, '').slice(0, 6);
+                            if (numbers.length === 6) {
+                                for (let j = 1; j <= 6; j++) {
+                                    const digitEl = document.getElementById(`digit${j}`);
+                                    digitEl.value = numbers[j - 1];
+                                    digitEl.classList.add('filled');
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+
+
+
+
+        // 添加点击反馈效果
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn') || e.target.classList.contains('todo-item')) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            }
+        });
+
+        // 关闭弹窗的通用处理
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                if (e.target.id === 'agreementModal') {
+                    closeAgreementModal();
+                } else if (e.target.id === 'rejectModal') {
+                    closeRejectModal();
+                } else if (e.target.id === 'verificationModal') {
+                    closeVerificationModal();
+                }
+            }
+            
+            // 点击toast背景关闭toast
+            if (e.target.classList.contains('toast-backdrop')) {
+                hideToast();
+            }
+        });
+
+        // 新增：保存协议选择并返回签署页
+        function saveAndBackToSignPage() {
+            savedSelectedAgreements = new Set(selectedAgreements);
+            showPage('signPage');
+        }
+    </script>
+</body>
+</html> 
